@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  et.product:
+    image: ${DOCKER_REGISTRY-}etproduct
+    build:
+      context: .
+      dockerfile: ET.Product/Dockerfile
+
+  easytransport:
+    image: ${DOCKER_REGISTRY-}easytransport
+    build:
+      context: .
+      dockerfile: EasyTransport/Dockerfile
+
