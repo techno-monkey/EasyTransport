@@ -1,4 +1,5 @@
 ﻿using ET.Models.DataBase.UserManagement;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -32,7 +33,7 @@ namespace ET.JwtAuthManager
             var claimIdentity = new ClaimsIdentity(new List<Claim> {
              new Claim(JwtRegisteredClaimNames.Name , userAccount.UserId),
              new Claim(ClaimTypes.Role, userAccount.Role),
-             new Claim("Email", userAccount.Email)
+             new Claim(JwtRegisteredClaimNames.Email, userAccount.Email)
             });
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey),
                 SecurityAlgorithms.HmacSha256Signature);
@@ -55,5 +56,24 @@ namespace ET.JwtAuthManager
             };
 
         }
+
+        //public static ClaimsPrincipal ValidateToken(string jwtToken)
+        //{
+        //    IdentityModelEventSource.ShowPII = true;
+
+        //    SecurityToken validatedToken;
+        //    TokenValidationParameters validationParameters = new TokenValidationParameters();
+
+        //    validationParameters.ValidateLifetime = true;
+        //    //validationParameters.ValidAudience = _audience.ToLower();
+        //    //validationParameters.ValidIssuer = _issuer.ToLower();
+
+        //    validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWT_SECURITY_KEY));
+
+        //    ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(jwtToken, validationParameters, out validatedToken);
+
+
+        //    return principal;
+        //}
     }
 }
