@@ -1,7 +1,7 @@
-﻿using trans =ET.Models.DataBase.Transport.Bus;
+﻿using ET.Models.DataBase.Order;
 using Microsoft.EntityFrameworkCore;
 
-namespace ET.Trans.Bus.DataBase
+namespace ET.Orders.DataBase
 {
     public class DatabaseContext: DbContext
     {
@@ -10,7 +10,6 @@ namespace ET.Trans.Bus.DataBase
 
         }
 
-        public DbSet<trans.Transporter> Transporters { get; set; }
-        public DbSet<trans.Bus> Buses { get; set; }
+        public DbSet<Order> Orders { get; set; }
     }
 }

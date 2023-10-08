@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="DataBase\Account\" />
     <Folder Include="DataBase\Payment\" />
-    <Folder Include="DtoModels\Order\" />
   </ItemGroup>
 
 </Project>

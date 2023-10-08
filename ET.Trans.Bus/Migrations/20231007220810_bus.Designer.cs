@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ET.Trans.Bus.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20231005203348_bus")]
+    [Migration("20231007220810_bus")]
     partial class bus
     {
         /// <inheritdoc />
@@ -25,11 +25,46 @@ namespace ET.Trans.Bus.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ET.Models.DataBase.Transport.Bus.Bus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("Fare")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TransporterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Buses");
+                });
+
             modelBuilder.Entity("ET.Models.DataBase.Transport.Bus.Transporter", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -42,28 +77,6 @@ namespace ET.Trans.Bus.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Transporters");
-                });
-
-            modelBuilder.Entity("ET.Models.DtoModels.Bus.Bus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Fare")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TransporterName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Buses");
                 });
 #pragma warning restore 612, 618
         }
