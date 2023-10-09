@@ -1,10 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ET.ServiceBus
 {
@@ -18,7 +13,17 @@ namespace ET.ServiceBus
         {
             _serviceBusConnectionString = serviceBusConnectionString;
             _subscriptionClient = new ServiceBusAdministrationClient(_serviceBusConnectionString);
-            _topicClient = new ServiceBusClient(_serviceBusConnectionString);
+            _topicClient = new ServiceBusClient(_serviceBusConnectionString, new ServiceBusClientOptions
+            {
+                TransportType = ServiceBusTransportType.AmqpTcp,
+                RetryOptions = new ServiceBusRetryOptions
+                {
+                    TryTimeout = TimeSpan.FromSeconds(60),
+                    MaxRetries = 3,
+                    Delay = TimeSpan.FromSeconds(.8)
+                }
+            });
+
         }
 
         public ServiceBusClient TopicClient
@@ -34,7 +39,6 @@ namespace ET.ServiceBus
         }
 
         public ServiceBusAdministrationClient AdministrationClient => _subscriptionClient;
-
 
         public async ValueTask DisposeAsync()
         {

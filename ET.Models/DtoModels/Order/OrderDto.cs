@@ -9,7 +9,7 @@ namespace ET.Models.DtoModels.Order
 {
     public class OrderDto
     {
-        public Guid OrderId { get; set; }
+        public Guid OrderId { get; set; } = new Guid();
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }
         public Guid BusId { get; set; }

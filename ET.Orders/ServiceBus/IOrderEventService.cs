@@ -1,9 +1,10 @@
-﻿namespace ET.Orders.ServiceBus
+﻿using ET.ServiceBus.Events;
+
+namespace ET.Orders.ServiceBus
 {
     public interface IOrderEventService
     {
-        Task PublishEventsAsync(Guid transactionId);
+        Task PublishEventsAsync(IntegrationEvent @event);
     }
-
 
 }

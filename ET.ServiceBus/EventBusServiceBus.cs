@@ -3,7 +3,9 @@ using Azure.Messaging.ServiceBus.Administration;
 using ET.ServiceBus.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Text.Json;
+using ServiceBusException = Azure.Messaging.ServiceBus.ServiceBusException;
 
 namespace ET.ServiceBus
 {
@@ -53,21 +55,80 @@ namespace ET.ServiceBus
 
         public void Publish(IntegrationEvent @event)
         {
-            throw new NotImplementedException();
+            var eventName = @event.GetType().Name.Replace(INTEGRATION_EVENT_SUFFIX, "");
+            var jsonMessage = JsonSerializer.Serialize(@event, @event.GetType());
+            var body = Encoding.UTF8.GetBytes(jsonMessage);
+            try
+            {
+                var message = new ServiceBusMessage
+                {
+                    MessageId = Guid.NewGuid().ToString(),
+                    Body = new BinaryData(body),
+                    Subject = eventName,
+                    SessionId = Guid.NewGuid().ToString()
+                };
+
+
+
+                _sender.SendMessageAsync(message)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (ServiceBusException ex)
+            {
+                _logger.LogError("The messaging entity {eventName} already exists.", eventName);
+            }
         }
 
         public void Subscribe<T, TH>()
             where T : IntegrationEvent
             where TH : IIntegrationEventHandler<T>
         {
-            throw new NotImplementedException();
+            var eventName = typeof(T).Name.Replace(INTEGRATION_EVENT_SUFFIX, "");
+
+            var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
+            if (!containsKey)
+            {
+                try
+                {
+                    _serviceBusConnection.AdministrationClient.CreateRuleAsync(_topicName, _subscriptionName, new CreateRuleOptions
+                    {
+                        Filter = new CorrelationRuleFilter() { Subject = eventName },
+                        Name = eventName
+                    }).GetAwaiter().GetResult();
+                }
+                catch (ServiceBusException)
+                {
+                    _logger.LogWarning("The messaging entity {eventName} already exists.", eventName);
+                }
+            }
+
+            _logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName, typeof(TH).Name);
+
+            _subsManager.AddSubscription<T, TH>();
         }
 
         public void Unsubscribe<T, TH>()
             where T : IntegrationEvent
             where TH : IIntegrationEventHandler<T>
         {
-            throw new NotImplementedException();
+            var eventName = typeof(T).Name.Replace(INTEGRATION_EVENT_SUFFIX, "");
+            try
+            {
+                _serviceBusConnection
+                    .AdministrationClient
+                    .DeleteRuleAsync(_topicName, _subscriptionName, eventName)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
+            {
+                _logger.LogWarning("The messaging entity {eventName} Could not be found.", eventName);
+            }
+
+            _logger.LogInformation("Unsubscribing from event {EventName}", eventName);
+
+            _subsManager.RemoveSubscription<T, TH>();
         }
 
 
@@ -75,11 +136,12 @@ namespace ET.ServiceBus
         {
             try
             {
-                _serviceBusConnection
-                    .AdministrationClient
-                    .DeleteRuleAsync(_topicName, _subscriptionName, RuleProperties.DefaultRuleName)
-                    .GetAwaiter()
-                    .GetResult();
+                if (!string.IsNullOrEmpty(_subscriptionName))
+                    _serviceBusConnection
+                        .AdministrationClient
+                        .DeleteRuleAsync(_topicName, _subscriptionName, RuleProperties.DefaultRuleName)
+                        .GetAwaiter()
+                        .GetResult();
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
             {

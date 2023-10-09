@@ -1,6 +1,9 @@
 ﻿using ET.Models.DataBase.Order;
 using ET.Models.DtoModels.Order;
 using ET.Orders.Interface;
+using ET.Orders.Model;
+using ET.Orders.ServiceBus;
+using ET.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +18,11 @@ namespace ET.Orders.Controllers
     {
 
         private readonly IOrderService _orderService;
-        public OrderAPIController(IOrderService orderService)
+        private readonly IEventBusServiceBus _orderEventService;
+        public OrderAPIController(IOrderService orderService, IEventBusServiceBus orderEventService)
         {
             _orderService = orderService;
+            _orderEventService = orderEventService;
         }
 
         // GET: api/<OrderAPIController>
@@ -37,15 +42,23 @@ namespace ET.Orders.Controllers
         }
 
         // POST api/<OrderAPIController>
+        //[HttpPost]
+        //[Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //public async Task<OrderDto> Post(Order obj)
+        //{
+        //    if (obj == null)
+        //        throw new ArgumentNullException("Bus");
+        //    var userId = User.FindFirst("Name")?.Value;
+        //    obj.CreatedBy = userId;
+        //    return await _orderService.Create(obj);
+        //}
+
         [HttpPost]
-        [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<OrderDto> Post(Order obj)
+        public async Task Post(OrderDto orderDto)
         {
-            if (obj == null)
-                throw new ArgumentNullException("Bus");
-            var userId = User.FindFirst("Name")?.Value;
-            obj.CreatedBy = userId;
-            return await _orderService.Create(obj);
+            var events = new OrderIntegrationData(orderDto);
+            _orderEventService.Publish(events);
         }
+
     }
 }
