@@ -3,6 +3,7 @@ using ET.Orders.Interface;
 using ET.Orders.Model;
 using ET.Orders.RepoService;
 using ET.Orders.Service;
+using ET.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,10 @@ builder.Services.AddScoped<IOrderRepo, OrderRepo>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSingleton<IServiceBusConnection>(provider => {
+    var option = provider.GetRequiredService<IOptions<AppOption>>().Value;
+    return new ServiceBusConnection(option.ServiceBusConnectionString);
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

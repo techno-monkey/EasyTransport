@@ -26,6 +26,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\ET.JwtAuthManager\ET.JwtAuthManager.csproj" />
 		<ProjectReference Include="..\ET.Models\ET.Models.csproj" />
+		<ProjectReference Include="..\ET.ServiceBus\ET.ServiceBus.csproj" />
 	</ItemGroup>
 
 </Project>

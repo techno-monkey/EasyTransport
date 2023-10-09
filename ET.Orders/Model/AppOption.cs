@@ -20,5 +20,7 @@
     {
         public override string OptionsName => "AppOption";
         public string DBConnectionString { get; set; }
+
+        public string ServiceBusConnectionString { get; set; }
     }
 }
